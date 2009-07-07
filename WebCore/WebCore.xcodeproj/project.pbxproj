@@ -680,6 +680,9 @@
 		46F9D5DD0B0D60170028EE36 /* aliasCursor.png in Resources */ = {isa = PBXBuildFile; fileRef = 46F9D5DA0B0D60170028EE36 /* aliasCursor.png */; };
 		46F9D5DE0B0D60170028EE36 /* noDropCursor.png in Resources */ = {isa = PBXBuildFile; fileRef = 46F9D5DB0B0D60170028EE36 /* noDropCursor.png */; };
 		46F9D5DF0B0D60170028EE36 /* progressCursor.png in Resources */ = {isa = PBXBuildFile; fileRef = 46F9D5DC0B0D60170028EE36 /* progressCursor.png */; };
+		473506961003DCFA005BC373 /* libnaaga.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 473506951003DCFA005BC373 /* libnaaga.dylib */; };
+		4753E0491003DC4000AAA4A1 /* PyPy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4753E0481003DC4000AAA4A1 /* PyPy.cpp */; };
+		4753E04B1003DC5000AAA4A1 /* PyPy.h in Headers */ = {isa = PBXBuildFile; fileRef = 4753E04A1003DC5000AAA4A1 /* PyPy.h */; };
 		494BD7950F55C8EE00747828 /* WebKitPoint.h in Headers */ = {isa = PBXBuildFile; fileRef = 494BD7930F55C8EE00747828 /* WebKitPoint.h */; };
 		494BD7990F55C90E00747828 /* JSWebKitPointConstructor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 494BD7970F55C90E00747828 /* JSWebKitPointConstructor.cpp */; };
 		494BD79A0F55C90E00747828 /* JSWebKitPointConstructor.h in Headers */ = {isa = PBXBuildFile; fileRef = 494BD7980F55C90E00747828 /* JSWebKitPointConstructor.h */; };
@@ -5703,6 +5706,9 @@
 		46F9D5DA0B0D60170028EE36 /* aliasCursor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = aliasCursor.png; sourceTree = "<group>"; };
 		46F9D5DB0B0D60170028EE36 /* noDropCursor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = noDropCursor.png; sourceTree = "<group>"; };
 		46F9D5DC0B0D60170028EE36 /* progressCursor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = progressCursor.png; sourceTree = "<group>"; };
+		473506951003DCFA005BC373 /* libnaaga.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libnaaga.dylib; path = libnaaga/libnaaga.dylib; sourceTree = "<group>"; };
+		4753E0481003DC4000AAA4A1 /* PyPy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PyPy.cpp; path = python/PyPy.cpp; sourceTree = "<group>"; };
+		4753E04A1003DC5000AAA4A1 /* PyPy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PyPy.h; path = python/PyPy.h; sourceTree = "<group>"; };
 		494BD7930F55C8EE00747828 /* WebKitPoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebKitPoint.h; sourceTree = "<group>"; };
 		494BD7940F55C8EE00747828 /* WebKitPoint.idl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = WebKitPoint.idl; sourceTree = "<group>"; };
 		494BD7970F55C90E00747828 /* JSWebKitPointConstructor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JSWebKitPointConstructor.cpp; sourceTree = "<group>"; };
@@ -9462,6 +9468,7 @@
 				93F19B1708245E59001E9ABC /* libicucore.dylib in Frameworks */,
 				1CFAE3230A6D6A3F0032593D /* libobjc.dylib in Frameworks */,
 				DD763BB20992C2C900740B8E /* libxml2.dylib in Frameworks */,
+				473506961003DCFA005BC373 /* libnaaga.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9516,6 +9523,7 @@
 		0867D69AFE84028FC02AAC07 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				473506951003DCFA005BC373 /* libnaaga.dylib */,
 				F5C2869302846DCD018635CA /* ApplicationServices.framework */,
 				F5C2869402846DCD018635CA /* Carbon.framework */,
 				F5C2869502846DCD018635CA /* Cocoa.framework */,
@@ -9904,6 +9912,15 @@
 				316FE1100E6E1DA700BF6088 /* KeyframeAnimation.h */,
 			);
 			name = animation;
+			sourceTree = "<group>";
+		};
+		4753E0471003DC2500AAA4A1 /* python */ = {
+			isa = PBXGroup;
+			children = (
+				4753E04A1003DC5000AAA4A1 /* PyPy.h */,
+				4753E0481003DC4000AAA4A1 /* PyPy.cpp */,
+			);
+			name = python;
 			sourceTree = "<group>";
 		};
 		49E911B20EF86D27009D0CAF /* transforms */ = {
@@ -13432,6 +13449,7 @@
 		BC1A3790097C6F970019F3D8 /* bindings */ = {
 			isa = PBXGroup;
 			children = (
+				4753E0471003DC2500AAA4A1 /* python */,
 				BC1A3793097C6FB10019F3D8 /* js */,
 				BC1A3794097C6FC40019F3D8 /* objc */,
 				93F8B3050A300FE100F61AB8 /* CodeGenerator.pm */,
@@ -16971,6 +16989,7 @@
 				FE6FD4880F676E5700092873 /* Coordinates.h in Headers */,
 				FE6FD48E0F676E9300092873 /* JSCoordinates.h in Headers */,
 				1C63A2480F71646600C09D5A /* RunLoopTimer.h in Headers */,
+				4753E04B1003DC5000AAA4A1 /* PyPy.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -18976,6 +18995,7 @@
 				FE6FD4870F676E5700092873 /* Coordinates.cpp in Sources */,
 				FE6FD48D0F676E9300092873 /* JSCoordinates.cpp in Sources */,
 				1C63A2490F71646600C09D5A /* RunLoopTimerCF.cpp in Sources */,
+				4753E0491003DC4000AAA4A1 /* PyPy.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -19007,6 +19027,11 @@
 			baseConfigurationReference = 1CDD45E50BA9C84600F90147 /* WebCore.xcconfig */;
 			buildSettings = {
 				INSTALL_PATH = "$(BUILT_PRODUCTS_DIR)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/libnaaga\"";
 			};
 			name = Debug;
 		};
@@ -19015,6 +19040,11 @@
 			baseConfigurationReference = 1CDD45E50BA9C84600F90147 /* WebCore.xcconfig */;
 			buildSettings = {
 				INSTALL_PATH = "$(BUILT_PRODUCTS_DIR)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/libnaaga\"";
 			};
 			name = Release;
 		};
@@ -19026,6 +19056,11 @@
 					normal,
 					debug,
 				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/libnaaga\"";
 				SECTORDER_FLAGS = (
 					"-sectorder",
 					__TEXT,

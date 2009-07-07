@@ -39,7 +39,7 @@
 #include "StringHash.h"
 #include "Text.h"
 #include <wtf/StdLibExtras.h>
-#include <bindings/python/PyPy.h>
+#include "PyPy.h"
 
 #if ENABLE(SVG)
 #include "SVGNames.h"

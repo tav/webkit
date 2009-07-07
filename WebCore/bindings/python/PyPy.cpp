@@ -12,8 +12,8 @@
 #include "PyPy.h"
 #include <stdio.h>
 
-char *RPython_StartupCode();
-long interpret(char *, char *);
+extern "C" char *RPython_StartupCode();
+extern "C" long interpret(char *, char *);
 
 namespace WebCore {
   class String;
@@ -30,10 +30,12 @@ namespace WebCore {
 
   void PyPyScriptEvaluator::evaluate(const String& mimeType, const ScriptSourceCode& sourceCode, void *context)
 	{
+    if (mimeType == String("python")) {
     if (!started_up) {
       started_up = 1;
       RPython_StartupCode();
     }
+	}
     interpret((char*)(sourceCode.jsSourceCode().toString().UTF8String().c_str()),
               (char*)context);
   }
