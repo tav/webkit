@@ -36,7 +36,7 @@ namespace WebCore {
             RPython_StartupCode();
         }
     }
-	}
+
     interpret((char*)(sourceCode.jsSourceCode().toString().UTF8String().c_str()),
               (char*)context);
   }

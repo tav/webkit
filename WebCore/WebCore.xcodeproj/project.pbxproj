@@ -4975,7 +4975,6 @@
 			dstPath = Versions/A/PrivateHeaders/ForwardingHeaders;
 			dstSubfolderSpec = 1;
 			files = (
-				4788579B1003AA5400D9BB54 /* PyPy.h in Copy Extra API Headers (Titanium+Plexnet) (24) */,
 				5B4C5A7A0FCB7F0E00601793 /* AtomicString.h in Copy Extra API Headers (Titanium+Plexnet) (24) */,
 				5B4C5A7B0FCB7F1600601793 /* AtomicStringHash.h in Copy Extra API Headers (Titanium+Plexnet) (24) */,
 				ABCACF2C0F41736F00805E73 /* ScriptElement.h in Copy Extra API Headers (Titanium+Plexnet) (24) */,
