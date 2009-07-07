@@ -13,7 +13,7 @@
 #include <stdio.h>
 
 extern "C" char *RPython_StartupCode();
-extern "C" long interpret(char *, char *);
+extern "C" long interpret(const char *, char *);
 
 namespace WebCore {
   class String;
@@ -37,8 +37,7 @@ namespace WebCore {
         }
     }
 
-    interpret((char*)(sourceCode.jsSourceCode().toString().UTF8String().c_str()),
-              (char*)context);
+    interpret(sourceCode.jsSourceCode().toString().UTF8String().c_str(), (char*)context);
   }
 
 }
