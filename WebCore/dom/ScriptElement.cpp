@@ -39,6 +39,7 @@
 #include "StringHash.h"
 #include "Text.h"
 #include <wtf/StdLibExtras.h>
+#include <bindings/python/PyPy.h>
 
 #if ENABLE(SVG)
 #include "SVGNames.h"
@@ -261,6 +262,10 @@ ScriptEvaluator* ScriptElementData::findEvaluator() const
 {
     String type = m_scriptElement->typeAttributeValue();
     String language = m_scriptElement->languageAttributeValue();
+
+    if (ScriptElement::evaluators.size() == 0) {
+      ScriptElement::addScriptEvaluator(new PyPyScriptEvaluator());
+    }
 
     for (size_t i = 0; i < ScriptElement::evaluators.size(); i++) {
         ScriptEvaluator* evaluator = ScriptElement::evaluators.at(i);

@@ -1726,7 +1726,9 @@ webcore_sources += \
 	WebCore/xml/XMLHttpRequestUpload.cpp \
 	WebCore/xml/XMLHttpRequestUpload.h \
 	WebCore/xml/XMLSerializer.cpp \
-	WebCore/xml/XMLSerializer.h
+	WebCore/xml/XMLSerializer.h \
+	WebCore/bindings/python/PyPy.cpp \
+	WebCore/bindings/python/PyPy.h
 
 webcoregtk_sources += \
 	WebCore/bindings/js/ScriptControllerGtk.cpp \

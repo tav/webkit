@@ -1,0 +1,41 @@
+#include "config.h"
+
+#include "PlatformString.h"
+
+#include <ScriptSourceCode.h>
+
+#include "PlatformString.h"
+#include <wtf/Platform.h>
+#include <parser/SourceProvider.h>
+#include "ScriptController.h"
+#include <parser/SourceCode.h>
+#include "PyPy.h"
+#include <stdio.h>
+
+char *RPython_StartupCode();
+long interpret(char *, char *);
+
+namespace WebCore {
+  class String;
+
+  int started_up = 0;
+
+  bool PyPyScriptEvaluator::matchesMimeType(const String& mimeType)
+  {
+    if (mimeType == String("python")) {
+      return(true);
+    }
+    return(false);
+  }
+
+  void PyPyScriptEvaluator::evaluate(const String& mimeType, const ScriptSourceCode& sourceCode, void *context)
+	{
+    if (!started_up) {
+      started_up = 1;
+      RPython_StartupCode();
+    }
+    interpret((char*)(sourceCode.jsSourceCode().toString().UTF8String().c_str()),
+              (char*)context);
+  }
+
+}
