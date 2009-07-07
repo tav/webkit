@@ -31,9 +31,10 @@ namespace WebCore {
   void PyPyScriptEvaluator::evaluate(const String& mimeType, const ScriptSourceCode& sourceCode, void *context)
 	{
     if (mimeType == String("python")) {
-    if (!started_up) {
-      started_up = 1;
-      RPython_StartupCode();
+        if (!started_up) {
+            started_up = 1;
+            RPython_StartupCode();
+        }
     }
 	}
     interpret((char*)(sourceCode.jsSourceCode().toString().UTF8String().c_str()),
