@@ -49,6 +49,7 @@
 #import <WebCore/FrameLoader.h>
 #import <WebCore/FrameTree.h>
 #import <WebCore/KURL.h>
+#import <WebCore/SecurityOrigin.h>
 #import <WebCore/ScriptController.h>
 #import <WebCore/ScriptValue.h>
 #import <WebCore/StringSourceProvider.h>
@@ -113,6 +114,7 @@ NetscapePluginInstanceProxy::NetscapePluginInstanceProxy(NetscapePluginHostProxy
     , m_shouldStopSoon(false)
     , m_currentRequestID(0)
     , m_inDestroy(false)
+    , m_pluginIsWaitingForDraw(false)
 {
     ASSERT(m_pluginView);
     
@@ -573,9 +575,10 @@ NPError NetscapePluginInstanceProxy::loadRequest(NSURLRequest *request, const ch
         return NPERR_INVALID_URL;
 
     // Don't allow requests to be loaded when the document loader is stopping all loaders.
-    if ([[m_pluginView dataSource] _documentLoader]->isStopping())
+    DocumentLoader* documentLoader = [[m_pluginView dataSource] _documentLoader];
+    if (!documentLoader || documentLoader->isStopping())
         return NPERR_GENERIC_ERROR;
-    
+
     NSString *target = nil;
     if (cTarget) {
         // Find the frame given the target string.
@@ -585,7 +588,7 @@ NPError NetscapePluginInstanceProxy::loadRequest(NSURLRequest *request, const ch
 
     // don't let a plugin start any loads if it is no longer part of a document that is being 
     // displayed unless the loads are in the same frame as the plugin.
-    if ([[m_pluginView dataSource] _documentLoader] != core([m_pluginView webFrame])->loader()->activeDocumentLoader() &&
+    if (documentLoader != core([m_pluginView webFrame])->loader()->activeDocumentLoader() &&
         (!cTarget || [frame findFrameNamed:target] != frame)) {
         return NPERR_GENERIC_ERROR; 
     }
@@ -597,7 +600,7 @@ NPError NetscapePluginInstanceProxy::loadRequest(NSURLRequest *request, const ch
             return NPERR_GENERIC_ERROR;
         }
     } else {
-        if (!FrameLoader::canLoad(URL, String(), core([m_pluginView webFrame])->document()))
+        if (!SecurityOrigin::canLoad(URL, String(), core([m_pluginView webFrame])->document()))
             return NPERR_GENERIC_ERROR;
     }
     
@@ -1285,9 +1288,19 @@ void NetscapePluginInstanceProxy::invalidateRect(double x, double y, double widt
 {
     ASSERT(m_pluginView);
     
+    m_pluginIsWaitingForDraw = true;
     [m_pluginView invalidatePluginContentRect:NSMakeRect(x, y, width, height)];
 }
 
+void NetscapePluginInstanceProxy::didDraw()
+{
+    if (!m_pluginIsWaitingForDraw)
+        return;
+    
+    m_pluginIsWaitingForDraw = false;
+    _WKPHPluginInstanceDidDraw(m_pluginHostProxy->port(), m_pluginID);
+}
+    
 bool NetscapePluginInstanceProxy::getCookies(data_t urlData, mach_msg_type_number_t urlLength, data_t& cookiesData, mach_msg_type_number_t& cookiesLength)
 {
     ASSERT(m_pluginView);
@@ -1428,6 +1441,11 @@ void NetscapePluginInstanceProxy::resolveURL(const char* url, const char* target
     resolvedURLLength = resolvedURL.length();
     mig_allocate(reinterpret_cast<vm_address_t*>(&resolvedURLData), resolvedURLLength);
     memcpy(resolvedURLData, resolvedURL.data(), resolvedURLLength);
+}
+
+void NetscapePluginInstanceProxy::privateBrowsingModeDidChange(bool isPrivateBrowsingEnabled)
+{
+    _WKPHPluginInstancePrivateBrowsingModeDidChange(m_pluginHostProxy->port(), m_pluginID, isPrivateBrowsingEnabled);
 }
 
 } // namespace WebKit

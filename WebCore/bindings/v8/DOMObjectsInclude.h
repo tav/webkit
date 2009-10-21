@@ -33,6 +33,8 @@
 
 #include "AbstractWorker.h"
 #include "BarInfo.h"
+#include "BeforeLoadEvent.h"
+#include "CanvasActiveInfo.h"
 #include "CanvasArray.h"
 #include "CanvasArrayBuffer.h"
 #include "CanvasBuffer.h"
@@ -157,7 +159,6 @@
 #include "V8HTMLElement.h"
 #include "V8LazyEventListener.h"
 #include "V8NodeFilterCondition.h"
-#include "V8ObjectEventListener.h"
 #include "ValidityState.h"
 #include "WebKitAnimationEvent.h"
 #include "WebKitCSSKeyframeRule.h"

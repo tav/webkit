@@ -149,8 +149,8 @@ my $verbose = 0;
 
 my @leaksFilenames;
 
-# Default to --no-http for Qt, and wx for now.
-$testHTTP = 0 if (isQt() || isWx());
+# Default to --no-http for wx for now.
+$testHTTP = 0 if (isWx());
 
 my $expectedTag = "expected";
 my $actualTag = "actual";
@@ -305,8 +305,8 @@ if ($shouldCheckLeaks && $testsPerDumpTool > 1000) {
 # Stack logging does not play well with QuickTime on Tiger (rdar://problem/5537157)
 $testMedia = 0 if $shouldCheckLeaks && isTiger();
 
-# Generating remote links causes a lot of unnecessary spew on GTK and Qt build bot
-$useRemoteLinksToTests = 0 if (isGtk() || isQt());
+# Generating remote links causes a lot of unnecessary spew on GTK build bot
+$useRemoteLinksToTests = 0 if isGtk();
 
 setConfigurationProductDir(Cwd::abs_path($root)) if (defined($root));
 my $productDir = productDir();

@@ -72,15 +72,8 @@ const char* V8Proxy::kContextDebugDataValue = "value";
 
 void batchConfigureAttributes(v8::Handle<v8::ObjectTemplate> instance, v8::Handle<v8::ObjectTemplate> proto, const BatchedAttribute* attributes, size_t attributeCount)
 {
-    for (size_t i = 0; i < attributeCount; ++i) {
-        const BatchedAttribute* attribute = &attributes[i];
-        (attribute->onProto ? proto : instance)->SetAccessor(v8::String::New(attribute->name),
-            attribute->getter,
-            attribute->setter,
-            attribute->data == V8ClassIndex::INVALID_CLASS_INDEX ? v8::Handle<v8::Value>() : v8::Integer::New(V8ClassIndex::ToInt(attribute->data)),
-            attribute->settings,
-            attribute->attribute);
-    }
+    for (size_t i = 0; i < attributeCount; ++i)
+        configureAttribute(instance, proto, attributes[i]);
 }
 
 void batchConfigureConstants(v8::Handle<v8::FunctionTemplate> functionDescriptor, v8::Handle<v8::ObjectTemplate> proto, const BatchedConstant* constants, size_t constantCount)
@@ -211,6 +204,14 @@ static void reportFatalErrorInV8(const char* location, const char* message)
     handleFatalErrorInV8();
 }
 
+V8Proxy::V8Proxy(Frame* frame)
+    : m_frame(frame),
+      m_context(SharedPersistent<v8::Context>::create()),
+      m_listenerGuard(V8ListenerGuard::create()),
+      m_inlineCode(false),
+      m_timerCallback(false),
+      m_recursion(0) { }
+
 V8Proxy::~V8Proxy()
 {
     clearForClose();
@@ -226,22 +227,6 @@ void V8Proxy::destroyGlobal()
         m_global.Dispose();
         m_global.Clear();
     }
-}
-
-static void disconnectEventListenersInList(V8EventListenerList& list)
-{
-    V8EventListenerList::iterator it = list.begin();
-    while (it != list.end()) {
-        (*it)->disconnectFrame();
-        ++it;
-    }
-    list.clear();
-}
-
-void V8Proxy::disconnectEventListeners()
-{
-    disconnectEventListenersInList(m_eventListeners);
-    disconnectEventListenersInList(m_objectListeners);
 }
 
 v8::Handle<v8::Script> V8Proxy::compileScript(v8::Handle<v8::String> code, const String& fileName, int baseLine)
@@ -282,10 +267,35 @@ bool V8Proxy::handleOutOfMemory()
     return true;
 }
 
-void V8Proxy::evaluateInNewWorld(const Vector<ScriptSourceCode>& sources, int extensionGroup)
+void V8Proxy::evaluateInIsolatedWorld(int worldID, const Vector<ScriptSourceCode>& sources, int extensionGroup)
 {
     initContextIfNeeded();
-    V8IsolatedWorld::evaluate(sources, this, extensionGroup);
+
+    v8::HandleScope handleScope;
+    V8IsolatedWorld* world = 0;
+
+    if (worldID > 0) {
+        IsolatedWorldMap::iterator iter = m_isolatedWorlds.find(worldID);
+        if (iter != m_isolatedWorlds.end()) {
+            world = iter->second;
+        } else {
+            world = new V8IsolatedWorld(this, extensionGroup);
+            m_isolatedWorlds.set(worldID, world);
+
+            // Setup context id for JS debugger.
+            setInjectedScriptContextDebugId(world->context());
+        }
+    } else {
+        world = new V8IsolatedWorld(this, extensionGroup);
+    }
+
+    v8::Local<v8::Context> context = v8::Local<v8::Context>::New(world->context());
+    v8::Context::Scope context_scope(context);
+    for (size_t i = 0; i < sources.size(); ++i)
+      evaluate(sources[i], 0);
+
+    if (worldID == 0)
+      world->destroy();
 }
 
 void V8Proxy::evaluateInNewContext(const Vector<ScriptSourceCode>& sources, int extensionGroup)
@@ -305,14 +315,7 @@ void V8Proxy::evaluateInNewContext(const Vector<ScriptSourceCode>& sources, int 
     v8::Context::Scope contextScope(context);
 
     // Setup context id for JS debugger.
-    v8::Handle<v8::Object> contextData = v8::Object::New();
-    v8::Handle<v8::Value> windowContextData = windowContext->GetData();
-    if (windowContextData->IsObject()) {
-        v8::Handle<v8::String> propertyName = v8::String::New(kContextDebugDataValue);
-        contextData->Set(propertyName, v8::Object::Cast(*windowContextData)->Get(propertyName));
-    }
-    contextData->Set(v8::String::New(kContextDebugDataType), v8::String::New("injected"));
-    context->SetData(contextData);
+    setInjectedScriptContextDebugId(context);
 
     v8::Handle<v8::Object> global = context->Global();
 
@@ -336,6 +339,21 @@ void V8Proxy::evaluateInNewContext(const Vector<ScriptSourceCode>& sources, int 
     // changes.
     context->UseDefaultSecurityToken();
     context.Dispose();
+}
+
+void V8Proxy::setInjectedScriptContextDebugId(v8::Handle<v8::Context> targetContext)
+{
+    // Setup context id for JS debugger.
+    v8::Context::Scope contextScope(targetContext);
+    v8::Handle<v8::Object> contextData = v8::Object::New();
+
+    v8::Handle<v8::Value> windowContextData = context()->GetData();
+    if (windowContextData->IsObject()) {
+        v8::Handle<v8::String> propertyName = v8::String::New(kContextDebugDataValue);
+        contextData->Set(propertyName, v8::Object::Cast(*windowContextData)->Get(propertyName));
+    }
+    contextData->Set(v8::String::New(kContextDebugDataType), v8::String::New("injected"));
+    targetContext->SetData(contextData);
 }
 
 v8::Local<v8::Value> V8Proxy::evaluate(const ScriptSourceCode& source, Node* node)
@@ -432,6 +450,17 @@ v8::Local<v8::Value> V8Proxy::callFunction(v8::Handle<v8::Function> function, v8
     v8::Local<v8::Value> result;
     {
         V8ConsoleMessage::Scope scope;
+
+        if (m_recursion >= kMaxRecursionDepth) {
+            v8::Local<v8::String> code = v8::String::New("throw new RangeError('Maximum call stack size exceeded.')");
+            if (code.IsEmpty())
+                return result;
+            v8::Local<v8::Script> script = v8::Script::Compile(code);
+            if (script.IsEmpty())
+                return result;
+            script->Run();
+            return result;
+        }
 
         // Evaluating the JavaScript could cause the frame to be deallocated,
         // so we start the keep alive timer here.
@@ -700,8 +729,25 @@ void V8Proxy::releaseStorageMutex()
         page->group().localStorage()->unlock();
 }
 
+void V8Proxy::disconnectEventListeners()
+{
+    m_listenerGuard->disconnectListeners();
+    m_listenerGuard = V8ListenerGuard::create();
+}
+    
+void V8Proxy::resetIsolatedWorlds()
+{
+    for (IsolatedWorldMap::iterator iter = m_isolatedWorlds.begin();
+         iter != m_isolatedWorlds.end(); ++iter) {
+        iter->second->destroy();
+    }
+    m_isolatedWorlds.clear();
+}
+
 void V8Proxy::clearForClose()
 {
+    resetIsolatedWorlds();
+
     if (!context().IsEmpty()) {
         v8::HandleScope handleScope;
 
@@ -713,6 +759,7 @@ void V8Proxy::clearForClose()
 void V8Proxy::clearForNavigation()
 {
     disconnectEventListeners();
+    resetIsolatedWorlds();
 
     if (!context().IsEmpty()) {
         v8::HandleScope handle;
@@ -904,6 +951,7 @@ v8::Persistent<v8::Context> V8Proxy::createNewContext(v8::Handle<v8::Object> glo
 
     // Install a security handler with V8.
     globalTemplate->SetAccessCheckCallbacks(V8Custom::v8DOMWindowNamedSecurityCheck, V8Custom::v8DOMWindowIndexedSecurityCheck, v8::Integer::New(V8ClassIndex::DOMWINDOW));
+    globalTemplate->SetInternalFieldCount(V8Custom::kDOMWindowInternalFieldCount);
 
     // Used to avoid sleep calls in unload handlers.
     if (!registeredExtensionWithV8(DateExtension::get()))
@@ -945,12 +993,14 @@ bool V8Proxy::installDOMWindow(v8::Handle<v8::Context> context, DOMWindow* windo
 
     // Wrap the window.
     V8DOMWrapper::setDOMWrapper(jsWindow, V8ClassIndex::ToInt(V8ClassIndex::DOMWINDOW), window);
+    V8DOMWrapper::setDOMWrapper(v8::Handle<v8::Object>::Cast(jsWindow->GetPrototype()), V8ClassIndex::ToInt(V8ClassIndex::DOMWINDOW), window);
 
     window->ref();
     V8DOMWrapper::setJSWrapperForDOMObject(window, v8::Persistent<v8::Object>::New(jsWindow));
 
     // Insert the window instance as the prototype of the shadow object.
     v8::Handle<v8::Object> v8Global = context->Global();
+    V8DOMWrapper::setDOMWrapper(v8::Handle<v8::Object>::Cast(v8Global->GetPrototype()), V8ClassIndex::ToInt(V8ClassIndex::DOMWINDOW), window);
     v8Global->Set(implicitProtoString, jsWindow);
     return true;
 }

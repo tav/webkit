@@ -1,7 +1,14 @@
-# ================================================================================================== #
-#      Failing tests introduced by changing the default font sizes to conform other platforms.
-#      Probably caused by previously hidden bugs.
-# ================================================================================================== #
+# Failing tests due to disabled Phonon support in Buildbot's Qt
+# Skip these until a proper solution for the Phonon related craches and timeouts is found
+fast/dom/dom-constructors.html
+fast/dom/Window/custom-constructors.html
+fast/dom/beforeload/video-before-load.html
+fast/js/instanceof-operator.html 
+
+# =========================================================================== #
+#      Failing tests introduced by changing the default font sizes to         #
+#      conform other platforms. Probably caused by previously hidden bugs.    #
+# =========================================================================== #
 editing/pasteboard/5761530-1.html
 editing/pasteboard/5780697-2.html
 fast/css/getComputedStyle/computed-style-without-renderer.html
@@ -11,17 +18,90 @@ fast/html/text-field-input-types.html
 svg/batik/filters/feTile.svg
 svg/custom/getscreenctm-in-mixed-content2.xhtml
 
+# =========================================================================== #
+#       HTTP tests.                                                           #
+# =========================================================================== #
+
+# Disabled HTTP subdirs for now, needs investigation.
+http/tests/appcache
+http/tests/webarchive
+http/tests/globalhistory
+http/tests/history
+http/tests/incremental
+http/tests/media
+http/tests/misc
+http/tests/navigation
+http/tests/plugins
+http/tests/security
+http/tests/ssl
+http/tests/webarchive
+http/tests/wml
+
+# Failing URL test
+http/tests/uri/escaped-entity.html
+
+# Failing HTTP Loading tests
+http/tests/loading/bad-server-subframe.html
+http/tests/loading/bad-scheme-subframe.html
+http/tests/loading/basic-auth-resend-wrong-credentials.html
+http/tests/loading/basic.html
+http/tests/loading/deleted-host-in-resource-load-delegate-callback.html
+http/tests/loading/empty-subframe.html
+http/tests/loading/gmail-assert-on-load.html
+http/tests/loading/location-hash-reload-cycle.html
+http/tests/loading/onload-vs-immediate-refresh.pl
+http/tests/loading/preload-img-test.html
+http/tests/loading/redirect-methods.html
+http/tests/loading/redirect-with-no-location-crash.html
+http/tests/loading/simple-subframe.html
+http/tests/loading/slow-parsing-subframe.html
+http/tests/loading/text-content-type-with-binary-extension.html
+
+# Failing Local tests
+http/tests/local/drag-over-remote-content.html
+http/tests/local/send-dragged-file.html
+
+# Flanky test
+http/tests/cookies/simple-cookies-max-age.html
+
+# This port doesn't support isolated worlds yet.
+http/tests/security/isolatedWorld/all-window-properties.html
+http/tests/security/isolatedWorld/all-window-prototypes.html
+http/tests/security/isolatedWorld/body-properties.html
+http/tests/security/isolatedWorld/body-prototype.html
+http/tests/security/isolatedWorld/click-event.html
+http/tests/security/isolatedWorld/document-open.html
+http/tests/security/isolatedWorld/document-properties.html
+http/tests/security/isolatedWorld/document-prototype.html
+http/tests/security/isolatedWorld/global-variables.html
+http/tests/security/isolatedWorld/image-properties.html
+http/tests/security/isolatedWorld/image-prototype.html
+http/tests/security/isolatedWorld/location-properties.html
+http/tests/security/isolatedWorld/location-prototype.html
+http/tests/security/isolatedWorld/window-setTimeout-function.html
+http/tests/security/isolatedWorld/window-setTimeout-string.html
+http/tests/security/isolatedWorld/storage-properties.html
+http/tests/security/isolatedWorld/storage-prototype.html
+http/tests/security/isolatedWorld/number-prototype.html
+http/tests/security/isolatedWorld/object-prototype.html
+http/tests/security/isolatedWorld/string-prototype.html
+http/tests/security/isolatedWorld/window-properties.html
+http/tests/security/isolatedWorld/world-reuse.html
+
+# Missing DRT ability return a null request for willSendRequest redirect calls
+http/tests/misc/will-send-request-returns-null-on-redirect.html
+
 # Failing test
 fast/canvas/quadraticCurveTo.xml
 
-# Crashing test on buildbot due to enabled phonon in Qt
-fast/table/008.html
+# Failing http multipart test
+http/tests/multipart/invalid-image-data-standalone.html
+
 # ------- missing features
 accessibility
 media
 webarchive
 svg/webarchive
-http/tests/webarchive
 
 editing/selection/4975120.html
 editing/selection/5109817.html
@@ -50,16 +130,17 @@ fast/text/find-hidden-text.html
 #            Missing features in our DumpRenderTree implementation              #
 # ============================================================================= #
 
+# Missing layoutTestController.showWebInspector()
+inspector/uncaught-dom1-exception.html
+inspector/uncaught-dom3-exception.html
+inspector/uncaught-dom8-exception.html
+
 # Missing textInputController.setMarkedText()
 fast/forms/input-maxlength-ime-preedit.html
 fast/forms/input-maxlength-ime-completed.html
 
 # Missing layoutTestController.overridePreference()
 fast/events/pageshow-pagehide-on-back-cached.html
-fast/events/tab-focus-anchor.html
-fast/events/click-focus-anchor.html
-
-# Missing layoutTestController.overridePreference()
 fast/events/pageshow-pagehide-on-back-cached-with-frames.html
 fast/loader/frames-with-unload-handlers-in-page-cache.html
 
@@ -69,6 +150,12 @@ fast/encoding/mailto-always-utf-8.html
 # Missing layoutTestController.dumpBackForwardList()
 fast/loader/fragment-after-redirect-gets-back-entry.html
 
+# Missing layoutTestController.setAlwaysAcceptCookies()
+http/tests/xmlhttprequest/access-control-basic-allow-preflight-cache-timeout
+
+# Missing layoutTestController.setUseDashboardCompatibilityMode()
+http/tests/xmlhttprequest/default-content-type-dashboard.html
+http/tests/xmlhttprequest/svg-created-by-xhr-disallowed-in-dashboard.html
 # ============================================================================= #
 
 # ------- missing eventSender.beginDragWithFiles
@@ -78,10 +165,34 @@ fast/events/prevent-drag-to-navigate.html
 fast/forms/get-file-upload.html
 fast/events/drag-file-crash.html
 
-# ------- failing worker test
-# Currently fails because on QNetworkReply::ContentNotFound error we
-# still deliver the content instead of reporting it as failure to WebCore
-fast/workers/worker-constructor.html
+# ------- missing eventSender.zoomPageIn
+fast/events/clientXY-in-zoom-and-scroll.html
+
+# ------- missing eventSender.zoomPageOut
+fast/dom/elementFromPoint-relative-to-viewport.html
+
+# ------- missing WebSoket support in DRT
+fast/dom/Window/window-properties.html
+fast/dom/prototype-inheritance.html
+fast/websockets/websocket-event-target.html
+
+# ------- missing drag-and-drop support
+fast/events/drag-and-drop-none.html
+fast/events/drag-parent-node.html
+fast/events/drag-and-drop.html
+fast/events/drag-and-drop-dataTransfer-types-nocrash.html
+
+# ------- broken backgroundOf(el)
+fast/forms/input-live-pseudo-selectors.html
+fast/forms/textarea-live-pseudo-selectors.html
+
+# ------- broken ICO file decoding
+fast/images/favicon-as-image.html
+fast/images/icon-0colors.html
+fast/images/icon-decoding.html
+
+# ------- missing private browsing support?
+plugins/private-browsing-mode.html
 
 # ------- failing editing tests
 editing/deleting/delete-to-end-of-paragraph.html
@@ -256,10 +367,8 @@ fast/forms/input-list.html
 fast/forms/input-selectedoption.html
 fast/forms/access-key.html
 fast/forms/button-cannot-be-nested.html
-fast/forms/button-spacebar-click.html
 fast/forms/control-restrict-line-height.html
 fast/forms/drag-into-textarea.html
-fast/forms/focus-control-to-page.html
 fast/forms/focus-selection-input.html
 fast/forms/focus-selection-textarea.html
 fast/forms/input-readonly-autoscroll.html
@@ -287,7 +396,6 @@ fast/frames/iframe-window-focus.html
 fast/history/clicked-link-is-visited.html
 fast/history/go-back-to-changed-name.html
 fast/html/keygen.html
-fast/images/icon-decoding.html
 fast/inline/dirtyLinesForInline.html
 fast/invalid/missing-end-tag.xhtml
 fast/invalid/residual-style.html
@@ -907,6 +1015,9 @@ svg/custom/image-with-prefix-in-webarchive.svg
 storage/domstorage/localstorage/iframe-events.html
 storage/domstorage/sessionstorage/iframe-events.html
 
+# ------- layoutTestController.notifyDone() does not work correctly
+storage/change-version.html
+
 # Tests that currently fail but perhaps used to work at some point.
 fast/dom/css-cached-import-rule.html
 fast/dom/open-and-close-by-DOM.html
@@ -1000,7 +1111,6 @@ fast/css/css2-system-fonts.html
 fast/css/namespaces/003.xml
 fast/css/namespaces/007.xml
 fast/doctypes/003.html
-fast/dom/assign-to-window-status.html
 fast/dom/frame-loading-via-document-write.html
 fast/dom/set-frame-src-while-running-script-in-frame.html
 fast/dom/wrapper-classes.html
@@ -1017,7 +1127,6 @@ fast/encoding/frame-default-enc.html
 fast/encoding/invalid-xml.html
 fast/encoding/mailto-always-utf-8.html
 fast/events/access-key-self-destruct.html
-fast/events/arrow-keys-on-body.html
 fast/events/attempt-scroll-with-no-scrollbars.html
 fast/events/contextmenu-scrolled-page-with-frame.html
 fast/events/key-events-in-input-button.html
@@ -1026,7 +1135,6 @@ fast/events/onchange-passwordfield.html
 fast/events/onchange-searchfield.html
 fast/events/onchange-textfield.html
 fast/events/onsearch-enter.html
-fast/forms/enter-clicks-buttons.html
 fast/forms/input-align-image.html
 fast/forms/input-align.html
 fast/forms/input-double-click-selection-gap-bug.html
@@ -1036,23 +1144,6 @@ fast/forms/legend-access-key.html
 fast/forms/slider-onchange-event.html
 fast/forms/textarea-rows-cols.html
 fast/forms/textfield-onchange-deletion.html
-fast/forms/mailto/advanced-get.html
-fast/forms/mailto/advanced-put.html
-fast/forms/mailto/get-multiple-items-text-plain.html
-fast/forms/mailto/get-multiple-items-x-www-form-urlencoded.html
-fast/forms/mailto/get-multiple-items.html
-fast/forms/mailto/get-non-ascii-always-utf-8.html
-fast/forms/mailto/get-non-ascii-text-plain-latin-1.html
-fast/forms/mailto/get-non-ascii-text-plain.html
-fast/forms/mailto/get-non-ascii.html
-fast/forms/mailto/get-overwrite-query.html
-fast/forms/mailto/post-append-query.html
-fast/forms/mailto/post-multiple-items-multipart-form-data.html
-fast/forms/mailto/post-multiple-items-text-plain.html
-fast/forms/mailto/post-multiple-items-x-www-form-urlencoded.html
-fast/forms/mailto/post-multiple-items.html
-fast/forms/mailto/post-text-plain-with-accept-charset.html
-fast/forms/mailto/post-text-plain.html
 fast/frames/onlyCommentInIFrame.html
 fast/history/subframe-is-visited.html
 fast/inline/positionedLifetime.html
@@ -2808,7 +2899,6 @@ fast/forms/preserveFormDuringResidualStyle.html
 fast/forms/radio-attr-order.html
 fast/forms/radio_checked_dynamic.html
 fast/forms/radio_checked.html
-fast/forms/radio_checked_name.html
 fast/forms/radio-nested-labels.html
 fast/forms/range-thumb-height-percentage.html
 fast/forms/search-cancel-button-style-sharing.html
@@ -4715,7 +4805,6 @@ fast/dom/Range/getBoundingClientRect.html
 fast/dom/Range/getClientRects.html
 fast/dom/location-assign.html
 fast/dom/tabindex-clamp.html
-fast/dom/Document/document-charset.html
 fast/dom/HTMLScriptElement/nested-execution.html
 fast/dom/Window/webkitConvertPoint.html
 fast/dom/Window/window-lookup-precedence.html
@@ -4725,8 +4814,6 @@ fast/encoding/hebrew/8859-8-i.html
 fast/encoding/hebrew/logical.html
 fast/events/autoscroll-nonscrollable-iframe-in-scrollable-div.html
 fast/events/crash-on-mutate-during-drop.html
-fast/events/mouseup-from-button2.html
-fast/events/mouseup-outside-button.html
 fast/events/pointer-events-2.html
 fast/events/special-key-events-in-input-text.html
 fast/events/stopPropagation-submit.html
@@ -4767,32 +4854,6 @@ svg/dom/SVGScriptElement/script-load-and-error-events.svg
 transforms/2d/transform-2d.html
 editing/selection/extend-selection-after-double-click.html
 
-# This port doesn't support isolated worlds yet.
-http/tests/security/isolatedWorld/all-window-properties.html
-http/tests/security/isolatedWorld/all-window-prototypes.html
-http/tests/security/isolatedWorld/body-properties.html
-http/tests/security/isolatedWorld/body-prototype.html
-http/tests/security/isolatedWorld/click-event.html
-http/tests/security/isolatedWorld/document-open.html
-http/tests/security/isolatedWorld/document-properties.html
-http/tests/security/isolatedWorld/document-prototype.html
-http/tests/security/isolatedWorld/global-variables.html
-http/tests/security/isolatedWorld/image-properties.html
-http/tests/security/isolatedWorld/image-prototype.html
-http/tests/security/isolatedWorld/location-properties.html
-http/tests/security/isolatedWorld/location-prototype.html
-http/tests/security/isolatedWorld/window-setTimeout-function.html
-http/tests/security/isolatedWorld/window-setTimeout-string.html
-http/tests/security/isolatedWorld/storage-properties.html
-http/tests/security/isolatedWorld/storage-prototype.html
-http/tests/security/isolatedWorld/number-prototype.html
-http/tests/security/isolatedWorld/object-prototype.html
-http/tests/security/isolatedWorld/string-prototype.html
-http/tests/security/isolatedWorld/window-properties.html
-
-# Missing DRT ability return a null request for willSendRequest redirect calls
-http/tests/misc/will-send-request-returns-null-on-redirect.html
-
 # Audio related tests are failing on buildbot
 # See: https://bugs.webkit.org/show_bug.cgi?id=27910
 fast/dom/constructed-objects-prototypes.html
@@ -4816,22 +4877,11 @@ fast/dom/prototype-inheritance-2.html
 
 # Missing DRT ability to override 'standard' preferences.
 fast/dom/Window/timer-resume-on-navigation-back.html
-fast/harness/override-preferences.html
-fast/harness/override-preferences-2.html
-fast/harness/override-zzz-reset.html
 fast/harness/use-page-cache.html
 loader/go-back-to-different-window-size.html
 
-# A test that failed because eventSender cannot send function-key events.
-fast/events/keydown-function-keys.html
-
 # This port doesn't support Geolocation.
 fast/dom/Geolocation
-
-# Started failing after http://trac.webkit.org/changeset/47229
-# https://bugs.webkit.org/show_bug.cgi?id=28288
-fast/css/getComputedStyle/computed-style-font-family-monospace.html
-fast/css/getComputedStyle/computed-style-font-family.html
 
 # Missing DRT ability to track worker thread counts
 fast/workers/dedicated-worker-lifecycle.html
@@ -4858,3 +4908,63 @@ fast/dom/Window/slow_unload_handler.html
 
 # This port doesn't have a global history delegate yet
 http/tests/globalhistory
+
+# Skip inspector tests
+inspector/console-dir.html
+inspector/console-dirxml.html
+inspector/console-format.html
+inspector/console-tests.html
+inspector/elements-panel-structure.html
+inspector/evaluate-in-frontend.html
+
+# Skip xmlhttprequest tests - NETWORK_ERR: XMLHttpRequest Exception 101: A network error occured in synchronous requests.
+http/tests/xmlhttprequest/access-control-basic-allow-preflight-cache-timeout.html
+http/tests/xmlhttprequest/access-control-basic-allow-preflight-cache.html
+http/tests/xmlhttprequest/access-control-basic-allow-star.html
+http/tests/xmlhttprequest/access-control-basic-get-fail-non-simple.html
+http/tests/xmlhttprequest/basic-auth.html
+http/tests/xmlhttprequest/cross-origin-authorization.html
+http/tests/xmlhttprequest/cross-origin-no-authorization.html
+http/tests/xmlhttprequest/logout.html
+http/tests/xmlhttprequest/methods-async.html
+http/tests/xmlhttprequest/simple-cross-origin-denied-events-post.html
+http/tests/xmlhttprequest/workers/shared-worker-methods.html
+
+# Skip xmlhttprequest tests
+http/tests/xmlhttprequest/XMLHttpRequestException.html
+http/tests/xmlhttprequest/abort-should-cancel-load.html
+http/tests/xmlhttprequest/access-control-and-redirects.html
+http/tests/xmlhttprequest/access-control-basic-allow-preflight-cache-invalidation-by-header.html
+http/tests/xmlhttprequest/access-control-basic-allow-preflight-cache-invalidation-by-method.html
+http/tests/xmlhttprequest/access-control-basic-non-simple-allow-async.html
+http/tests/xmlhttprequest/access-control-basic-non-simple-allow.html
+http/tests/xmlhttprequest/access-control-basic-non-simple-deny-cached.html
+http/tests/xmlhttprequest/access-control-basic-post-fail-non-simple-content-type.html
+http/tests/xmlhttprequest/access-control-basic-whitelist-request-headers.html
+http/tests/xmlhttprequest/access-control-preflight-headers-async.html
+http/tests/xmlhttprequest/access-control-preflight-headers-sync.html
+http/tests/xmlhttprequest/cache-override.html
+http/tests/xmlhttprequest/connection-error-sync.html
+http/tests/xmlhttprequest/cookies.html
+http/tests/xmlhttprequest/cross-origin-cookie-storage.html
+http/tests/xmlhttprequest/failed-auth.html
+http/tests/xmlhttprequest/methods-lower-case.html
+http/tests/xmlhttprequest/methods.html
+http/tests/xmlhttprequest/re-login-async.html
+http/tests/xmlhttprequest/re-login.html
+http/tests/xmlhttprequest/redirect-cross-origin-2.html
+http/tests/xmlhttprequest/redirect-cross-origin-post.html
+http/tests/xmlhttprequest/redirect-cross-origin-tripmine.html
+http/tests/xmlhttprequest/redirect-cross-origin.html
+http/tests/xmlhttprequest/send-on-abort.html
+http/tests/xmlhttprequest/state-after-network-error.html
+http/tests/xmlhttprequest/upload-onload-event.html
+http/tests/xmlhttprequest/upload-onprogress-event.html
+http/tests/xmlhttprequest/upload-progress-events.html
+http/tests/xmlhttprequest/xmlhttprequest-onProgress-open-should-zero-length.html
+http/tests/xmlhttprequest/xmlhttprequest-post-crash.html
+http/tests/xmlhttprequest/xmlhttprequest-unsafe-redirect.html
+http/tests/xmlhttprequest/zero-length-response-sync.html
+http/tests/xmlhttprequest/workers/methods-async.html
+http/tests/xmlhttprequest/workers/methods.html
+http/tests/xmlhttprequest/workers/shared-worker-methods-async.html

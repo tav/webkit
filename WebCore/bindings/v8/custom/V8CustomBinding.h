@@ -78,6 +78,8 @@ struct NPObject;
     bool V8Custom::v8##NAME##IndexedSecurityCheck(v8::Local<v8::Object> host, \
         uint32_t index, v8::AccessType type, v8::Local<v8::Value> data)
 
+#define ACCESSOR_RUNTIME_ENABLER(NAME) bool V8Custom::v8##NAME##Enabled()
+
 namespace WebCore {
 
     class DOMWindow;
@@ -122,22 +124,35 @@ namespace WebCore {
         static const int kMessagePortInternalFieldCount = kDefaultWrapperInternalFieldCount + 2;
 
 #if ENABLE(WORKERS)
-        static const int kWorkerRequestCacheIndex = kDefaultWrapperInternalFieldCount + 0;
-        static const int kWorkerInternalFieldCount = kDefaultWrapperInternalFieldCount + 1;
+        static const int kAbstractWorkerRequestCacheIndex = kDefaultWrapperInternalFieldCount + 0;
+        static const int kAbstractWorkerInternalFieldCount = kDefaultWrapperInternalFieldCount + 1;
+
+        static const int kWorkerRequestCacheIndex = kAbstractWorkerInternalFieldCount + 0;
+        static const int kWorkerInternalFieldCount = kAbstractWorkerInternalFieldCount + 1;
 
         static const int kWorkerContextRequestCacheIndex = kDefaultWrapperInternalFieldCount + 0;
         static const int kWorkerContextMinimumInternalFieldCount = kDefaultWrapperInternalFieldCount + 1;
 
         static const int kDedicatedWorkerContextRequestCacheIndex = kWorkerContextMinimumInternalFieldCount + 0;
         static const int kDedicatedWorkerContextInternalFieldCount = kWorkerContextMinimumInternalFieldCount + 1;
+#endif
 
-        static const int kAbstractWorkerRequestCacheIndex = kDefaultWrapperInternalFieldCount + 0;
-        static const int kAbstractWorkerInternalFieldCount = kDefaultWrapperInternalFieldCount + 1;
+#if ENABLE(SHARED_WORKERS)
+        static const int kSharedWorkerRequestCacheIndex = kAbstractWorkerInternalFieldCount + 0;
+        static const int kSharedWorkerInternalFieldCount = kAbstractWorkerInternalFieldCount + 1;
+
+        static const int kSharedWorkerContextRequestCacheIndex = kWorkerContextMinimumInternalFieldCount + 0;
+        static const int kSharedWorkerContextInternalFieldCount = kWorkerContextMinimumInternalFieldCount + 1;
 #endif
 
 #if ENABLE(NOTIFICATIONS)
         static const int kNotificationRequestCacheIndex = kDefaultWrapperInternalFieldCount + 0;
         static const int kNotificationInternalFieldCount = kDefaultWrapperInternalFieldCount + 1;
+#endif
+
+#if ENABLE(SVG)
+        static const int kSVGElementInstanceEventListenerCacheIndex = kDefaultWrapperInternalFieldCount + 0;
+        static const int kSVGElementInstanceInternalFieldCount = kDefaultWrapperInternalFieldCount + 1;
 #endif
 
         static const int kDOMWindowConsoleIndex = kDefaultWrapperInternalFieldCount + 0;
@@ -153,7 +168,8 @@ namespace WebCore {
         static const int kDOMWindowToolbarIndex = kDefaultWrapperInternalFieldCount + 10;
         static const int kDOMWindowLocationIndex = kDefaultWrapperInternalFieldCount + 11;
         static const int kDOMWindowDOMSelectionIndex = kDefaultWrapperInternalFieldCount + 12;
-        static const int kDOMWindowInternalFieldCount = kDefaultWrapperInternalFieldCount + 13;
+        static const int kDOMWindowEventListenerCacheIndex = kDefaultWrapperInternalFieldCount + 13;
+        static const int kDOMWindowInternalFieldCount = kDefaultWrapperInternalFieldCount + 14;
 
         static const int kStyleSheetOwnerNodeIndex = kDefaultWrapperInternalFieldCount + 0;
         static const int kStyleSheetInternalFieldCount = kDefaultWrapperInternalFieldCount + 1;
@@ -226,6 +242,8 @@ namespace WebCore {
     static bool v8##NAME##IndexedSecurityCheck(v8::Local<v8::Object> host, \
         uint32_t index, v8::AccessType type, v8::Local<v8::Value> data)
 
+#define DECLARE_ACCESSOR_RUNTIME_ENABLER(NAME) static bool v8##NAME##Enabled()
+
         DECLARE_PROPERTY_ACCESSOR(CanvasRenderingContext2DStrokeStyle);
         DECLARE_PROPERTY_ACCESSOR(CanvasRenderingContext2DFillStyle);
         DECLARE_PROPERTY_ACCESSOR(DOMWindowEvent);
@@ -235,6 +253,11 @@ namespace WebCore {
 
 #if ENABLE(VIDEO)
         DECLARE_PROPERTY_ACCESSOR_GETTER(DOMWindowAudio);
+        DECLARE_ACCESSOR_RUNTIME_ENABLER(DOMWindowAudio);
+        DECLARE_ACCESSOR_RUNTIME_ENABLER(DOMWindowHTMLMediaElement);
+        DECLARE_ACCESSOR_RUNTIME_ENABLER(DOMWindowHTMLAudioElement);
+        DECLARE_ACCESSOR_RUNTIME_ENABLER(DOMWindowHTMLVideoElement);
+        DECLARE_ACCESSOR_RUNTIME_ENABLER(DOMWindowMediaError);
 #endif
 
         DECLARE_PROPERTY_ACCESSOR_GETTER(DOMWindowImage);
@@ -442,12 +465,12 @@ namespace WebCore {
         DECLARE_CALLBACK(TreeWalkerNextSibling);
         DECLARE_CALLBACK(TreeWalkerPreviousSibling);
 
-        DECLARE_CALLBACK(InspectorBackendProfiles);
         DECLARE_CALLBACK(InspectorBackendHighlightDOMNode);
         DECLARE_CALLBACK(InspectorBackendAddResourceSourceToFrame);
         DECLARE_CALLBACK(InspectorBackendAddSourceToFrame);
         DECLARE_CALLBACK(InspectorBackendSearch);
         DECLARE_CALLBACK(InspectorBackendSetting);
+        DECLARE_CALLBACK(InspectorBackendDatabaseForId);
         DECLARE_CALLBACK(InspectorBackendInspectedWindow);
         DECLARE_CALLBACK(InspectorBackendSetSetting);
         DECLARE_CALLBACK(InspectorBackendCurrentCallFrame);
@@ -459,7 +482,6 @@ namespace WebCore {
         DECLARE_CALLBACK(InspectorBackendUnwrapObject);
         DECLARE_CALLBACK(InspectorBackendPushNodePathToFrontend);
 #if ENABLE(DATABASE)
-        DECLARE_CALLBACK(InspectorBackendDatabaseTableNames);
         DECLARE_CALLBACK(InspectorBackendSelectDatabase);
 #endif
 #if ENABLE(DOM_STORAGE)
@@ -614,6 +636,7 @@ namespace WebCore {
 
 #if ENABLE(SHARED_WORKERS)
         DECLARE_CALLBACK(SharedWorkerConstructor);
+        DECLARE_ACCESSOR_RUNTIME_ENABLER(DOMWindowSharedWorker);
 #endif
 
 #if ENABLE(WEB_SOCKETS)
@@ -621,8 +644,11 @@ namespace WebCore {
         DECLARE_PROPERTY_ACCESSOR(WebSocketOnmessage);
         DECLARE_PROPERTY_ACCESSOR(WebSocketOnclose);
         DECLARE_CALLBACK(WebSocketConstructor);
+        DECLARE_CALLBACK(WebSocketAddEventListener);
+        DECLARE_CALLBACK(WebSocketRemoveEventListener);
         DECLARE_CALLBACK(WebSocketSend);
         DECLARE_CALLBACK(WebSocketClose);
+        DECLARE_ACCESSOR_RUNTIME_ENABLER(DOMWindowWebSocket);
 #endif
 
 #undef DECLARE_INDEXED_ACCESS_CHECK

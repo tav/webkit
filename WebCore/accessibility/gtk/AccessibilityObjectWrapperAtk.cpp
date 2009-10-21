@@ -136,6 +136,21 @@ static AtkObject* webkit_accessible_get_parent(AtkObject* object)
 {
     AccessibilityObject* coreParent = core(object)->parentObject();
 
+    // The top level web view claims to not have a parent. This makes it
+    // impossible for assistive technologies to ascend the accessible
+    // hierarchy all the way to the application. (Bug 30489)
+    if (!coreParent && core(object)->isWebArea()) {
+        HostWindow* hostWindow = core(object)->document()->view()->hostWindow();
+        if (hostWindow) {
+            PlatformPageClient webView = hostWindow->platformPageClient();
+            if (webView) {
+                GtkWidget* webViewParent = gtk_widget_get_parent(webView);
+                if (webViewParent)
+                    return gtk_widget_get_accessible(webViewParent);
+            }
+        }
+    }
+
     if (!coreParent)
         return NULL;
 
@@ -172,6 +187,28 @@ static gint webkit_accessible_get_index_in_parent(AtkObject* object)
     // FIXME: This needs to be implemented.
     notImplemented();
     return 0;
+}
+
+static AtkAttributeSet* addAttributeToSet(AtkAttributeSet* attributeSet, const char* name, const char* value)
+{
+    AtkAttribute* attribute = static_cast<AtkAttribute*>(g_malloc(sizeof(AtkAttribute)));
+    attribute->name = g_strdup(name);
+    attribute->value = g_strdup(value);
+    attributeSet = g_slist_prepend(attributeSet, attribute);
+
+    return attributeSet;
+}
+
+static AtkAttributeSet* webkit_accessible_get_attributes(AtkObject* object)
+{
+    AtkAttributeSet* attributeSet = NULL;
+
+    int headingLevel = core(object)->headingLevel();
+    if (headingLevel) {
+        String value = String::number(headingLevel);
+        attributeSet = addAttributeToSet(attributeSet, "level", value.utf8().data());
+    }
+    return attributeSet;
 }
 
 static AtkRole atkRole(AccessibilityRole role)
@@ -234,8 +271,6 @@ static AtkRole atkRole(AccessibilityRole role)
         return ATK_ROLE_TABLE;
     case ApplicationRole:
         return ATK_ROLE_APPLICATION;
-    //case LabelRole: // TODO: should this be covered in the switch?
-    //    return ATK_ROLE_LABEL;
     case GroupRole:
     case RadioGroupRole:
         return ATK_ROLE_PANEL;
@@ -278,11 +313,17 @@ static AtkRole webkit_accessible_get_role(AtkObject* object)
             return ATK_ROLE_LIST_ITEM;
     }
 
-    // WebCore does not know about paragraph role
+    // WebCore does not know about paragraph role, label role, or section role
     if (AXObject->isAccessibilityRenderObject()) {
         Node* node = static_cast<AccessibilityRenderObject*>(AXObject)->renderer()->node();
-        if (node && node->hasTagName(HTMLNames::pTag))
-            return ATK_ROLE_PARAGRAPH;
+        if (node) {
+            if (node->hasTagName(HTMLNames::pTag))
+                return ATK_ROLE_PARAGRAPH;
+            if (node->hasTagName(HTMLNames::labelTag))
+                return ATK_ROLE_LABEL;
+            if (node->hasTagName(HTMLNames::divTag))
+                return ATK_ROLE_SECTION;
+        }
     }
 
     // Note: Why doesn't WebCore have a password field for this
@@ -408,6 +449,7 @@ static void webkit_accessible_class_init(AtkObjectClass* klass)
     klass->get_role = webkit_accessible_get_role;
     klass->ref_state_set = webkit_accessible_ref_state_set;
     klass->get_index_in_parent = webkit_accessible_get_index_in_parent;
+    klass->get_attributes = webkit_accessible_get_attributes;
 }
 
 GType

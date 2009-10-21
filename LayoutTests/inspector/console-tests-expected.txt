@@ -1,0 +1,25 @@
+CONSOLE MESSAGE: line 8: log
+CONSOLE MESSAGE: line 9: debug
+CONSOLE MESSAGE: line 10: info
+CONSOLE MESSAGE: line 11: warn
+CONSOLE MESSAGE: line 12: error
+CONSOLE MESSAGE: line 14: repeated
+CONSOLE MESSAGE: line 14: repeated
+CONSOLE MESSAGE: line 14: repeated
+CONSOLE MESSAGE: line 14: repeated
+CONSOLE MESSAGE: line 14: repeated
+CONSOLE MESSAGE: line 19: 1
+Tests that console logging dumps proper messages.
+
+console-tests.html:8log console-message console-js-source console-log-level
+console-tests.html:9debug console-message console-js-source console-log-level
+console-tests.html:10info console-message console-js-source console-log-level
+console-tests.html:11warn console-message console-js-source console-warning-level
+console-tests.html:12error console-message console-js-source console-error-level
+console-tests.html:14repeated console-message console-js-source console-log-level
+console-tests.html:16count: 1 console-message console-js-source console-log-level
+console-tests.html:16count: 2 console-message console-js-source console-log-level
+console-tests.html:17group console-message console-js-source console-log-level console-group-title
+console-message console-js-source console-log-level
+console-tests.html:191 2 3 console-message console-js-source console-log-level
+

@@ -1,3 +1,560 @@
+2009-10-20  Fumitoshi Ukai  <ukai@chromium.org>
+
+        Reviewed by David Levin.
+
+        Removed WebSocket runtime settings.
+        https://bugs.webkit.org/show_bug.cgi?id=29896
+
+        WebSocket runtime configuration is supported by chromium/v8 only.
+
+        * Interfaces/IWebPreferencesPrivate.idl:
+        * WebPreferenceKeysPrivate.h:
+        * WebPreferences.cpp:
+        (WebPreferences::initializeDefaultSettings):
+        (WebPreferences::experimentalNotificationsEnabled):
+        * WebPreferences.h:
+        * WebView.cpp:
+        (WebView::notifyPreferencesChanged):
+
+2009-10-19  Adam Roben  <aroben@apple.com>
+
+        Fix crashes/assertions when calling WebLocalizedString from multiple
+        threads concurrently
+
+        Fixes <http://webkit.org/b/30534> WebLocalizedString asserts if called
+        from multiple threads concurrently
+
+        Reviewed by John Sullivan.
+
+        * WebLocalizableStrings.cpp:
+        (mainBundleLocStringsMutex):
+        (frameworkLocStringsMutex):
+        Added these new getters.
+
+        (findCachedString):
+        (cacheString):
+        Lock the relevant mutex before accessing each string map. Otherwise
+        bad things could happen if two threads end up here at the same time.
+
+2009-10-19  Adam Roben  <aroben@apple.com>
+
+        Get rid of a few static initializers/exit-time destructors in
+        WebLocalizableStrings
+
+        Reviewed by Dan Bernstein.
+
+        * WebLocalizableStrings.cpp:
+        (mainBundleLocStrings):
+        (frameworkLocStrings):
+        Added these functions instead of file-scope variables.
+
+        (findCachedString):
+        (cacheString):
+        Updated to use the new functions.
+
+2009-10-19  Nate Chapin  <japhet@chromium.org>
+
+        Unreviewed, build fix.
+
+        Update call to FrameLoader::urlSelected().
+
+        * WebCoreSupport/WebContextMenuClient.cpp:
+        (WebContextMenuClient::searchWithGoogle):
+
+2009-10-16  Steve Falkenburg  <sfalken@apple.com>
+
+        Reviewed by Dan Bernstein.
+
+        https://bugs.webkit.org/show_bug.cgi?id=30456
+        Fixes for new Debug_All Windows build configuration.
+
+        * WebKitClassFactory.cpp: Use new DEBUG_ALL preprocessor define for library naming.
+
+2009-10-16  Jon Honeycutt  <jhoneycutt@apple.com>
+
+        Add SPI to determine whether a plug-in has ever been halted.
+
+        Part of <rdar://problem/7312158>.
+
+        Reviewed by Dan Bernstein.
+
+        * Interfaces/IWebViewPrivate.idl:
+        Add hasPluginForNodeBeenHalted().
+
+        * WebView.cpp:
+        (pluginViewForNode):
+        Code factored out of isNodeHaltedPlugin().
+        (WebView::isNodeHaltedPlugin):
+        Remove STDMETHODCALLTYPE, as it has no use at the definition. Use
+        pluginViewForNode().
+        (WebView::restartHaltedPluginForNode):
+        Ditto.
+        (WebView::hasPluginForNodeBeenHalted):
+        Get the PluginView for the given node. Return the result of
+        PluginView::hasBeenHalted().
+
+        * WebView.h:
+        Declare hasPluginForNodeBeenHalted().
+
+2009-10-16  Steve Falkenburg  <sfalken@apple.com>
+
+        Reviewed by Adam Roben.
+
+        Add a Debug_All configuration to build entire stack as debug.
+        Change Debug_Internal to:
+        - stop using _debug suffix for all WebKit/Safari binaries
+        - not use _debug as a DLL naming suffix
+        - use non-debug C runtime lib.
+
+        * WebKit.vcproj/InterfacesGenerated.vcproj: Renamed single configuration from "Release" to "all".
+        * WebKit.vcproj/WebKit.make: Debug build in makefile should build Debug_All.
+        * WebKit.vcproj/WebKit.sln: Add Debug_All configuration.
+        * WebKit.vcproj/WebKit.submit.sln: Add Debug_All configuration.
+        * WebKit.vcproj/WebKit.vcproj:
+        Remove extraneous OutputDirectory/IntermediateDirectory in Debug_Cairo.
+        Add Debug_All configuration.
+        * WebKit.vcproj/WebKitGUID.vcproj: Add Debug_All configuration.
+
+2009-10-15  Jon Honeycutt  <jhoneycutt@apple.com>
+
+        Add SPI to restart a halted plug-in.
+
+        Part of <rdar://problem/7273354> Halted plug-ins should restart on
+        mouseover
+
+        https://bugs.webkit.org/show_bug.cgi?id=30151
+
+        Reviewed by Kevin Decker.
+
+        * Interfaces/IWebViewPrivate.idl:
+        Add restartHaltedPluginForNode().
+
+        * WebView.cpp:
+        (WebView::restartHaltedPluginForNode):
+        From the IDOMNode, query for the DOMNode. From the DOMNode, get the
+        WebCore::Node. Get the node's renderer, and check whether it is a
+        RenderWidget. If so, get its Widget, and check whether it's a
+        PluginView. If so, call PluginView::restart().
+
+        * WebView.h:
+        Declare restartHaltedPluginForNode().
+
+2009-10-14  Jon Honeycutt  <jhoneycutt@apple.com>
+
+        Add SPI to determine whether a node is a halted plug-in.
+
+        Part of <rdar://problem/7273354> Halted plug-ins should restart on
+        mouseover
+
+        https://bugs.webkit.org/show_bug.cgi?id=30151
+
+        Reviewed by Darin Adler.
+
+        * Interfaces/IWebViewPrivate.idl:
+        Add isNodehaltedPlugin().
+
+        * WebView.cpp:
+        (WebView::isNodeHaltedPlugin):
+        From the IDOMNode, query for the DOMNode. From the DOMNode, get the
+        WebCore::Node. Get the node's renderer, and check whether it is a
+        RenderWidget. If so, get its Widget, and check whether it's a
+        PluginView. If so, return the result of PluginView::isHalted().
+
+        * WebView.h:
+        Declare isNodeHaltedPlugin().
+
+2009-10-15  Daniel Bates  <dbates@webkit.org>
+
+        Reviewed by Adam Roben.
+
+        https://bugs.webkit.org/show_bug.cgi?id=24731
+        And
+        rdar://problem/5015961
+        
+        Implements support for DHTML drag-and-drop operations (i.e. ondragstart, ondragend)
+        in the Windows build so that it conforms to the Mac OS X build. Hence, dropEffect is
+        correctly set.
+        
+        The WebView and WebDropSource drag-and-drop functions, as called by function
+        DoDragDrop in its event loop, neither used the drop effect as specified by
+        event.dataTransfer.dropEffect nor respected event.dataTransfer.effectsAllowed.
+        Instead, these functions defaulted to some hardcoded drop effect and set of
+        allowed drop effects, respectively.
+
+        Tests: fast/events/drag-and-drop.html
+
+        * WebCoreSupport/WebDragClient.cpp:
+        (WebDragClient::startDrag):
+        * WebDropSource.cpp:
+        (WebDropSource::QueryContinueDrag): Moved call to EventHandler::dragSourceEndedAt
+        into method WebDragClient::startDrag.
+        * WebDropSource.h:
+        * WebView.cpp:
+        (WebView::keyStateToDragOperation): Fixes <rdar://problem/5015961>. Determines
+        appropriate drop effect from state of keyboard and allowed effects
+        m_page->dragController()->sourceDragOperation().
+        (WebView::DragEnter):
+        (WebView::DragOver):
+        (WebView::Drop):
+        * WebView.h:
+
+2009-10-14  Adam Roben  <aroben@apple.com>
+
+        Windows build fix
+
+        * WebKit.vcproj/Interfaces.vcproj: Exclude IWebHistoryDelegate and
+        IWebNavigationData from the build (they get #imported via WebKit.idl).
+
+2009-10-14  Brady Eidson  <beidson@apple.com>
+
+        Reviewed by Sam Weinig.
+
+        WebKit Win API should provide a delegate interface for global history.
+        https://bugs.webkit.org/show_bug.cgi?id=29905
+
+        -Add IWebHistoryDelegate for clients to implement.
+        -Add (I)WebNavigationData for the history delegate's use.
+        -When it exists, call the history delegate instead of using WebHistory.
+        
+        * Interfaces/IWebHistoryDelegate.idl: Added.
+        * Interfaces/IWebHistoryPrivate.idl:
+        * Interfaces/IWebNavigationData.idl: Added.
+        * Interfaces/IWebViewPrivate.idl:
+        * Interfaces/WebKit.idl:
+        
+        * WebKit.vcproj/Interfaces.vcproj:
+        * WebKit.vcproj/WebKit.vcproj:
+
+        * WebCoreSupport/WebChromeClient.cpp:
+        (WebChromeClient::populateVisitedLinks):
+        * WebCoreSupport/WebFrameLoaderClient.cpp:
+        (WebFrameLoaderClient::updateGlobalHistory):
+        (WebFrameLoaderClient::updateGlobalHistoryRedirectLinks):
+        (WebFrameLoaderClient::setTitle):
+ 
+         * WebView.cpp:
+        (WebView::close):
+        (WebView::mainFrameURL):
+        (WebView::setHistoryDelegate):
+        (WebView::historyDelegate):
+        (WebView::addVisitedLinks):
+        * WebView.h:
+        
+        * WebHistory.cpp:
+        (WebHistory::setVisitedLinkTrackingEnabled):
+        (WebHistory::removeAllVisitedLinks):
+        * WebHistory.h:
+
+        * WebNavigationData.cpp: Added.
+        (WebNavigationData::QueryInterface):
+        (WebNavigationData::AddRef):
+        (WebNavigationData::Release):
+        (WebNavigationData::WebNavigationData):
+        (WebNavigationData::~WebNavigationData):
+        (WebNavigationData::createInstance):
+        (WebNavigationData::url):
+        (WebNavigationData::title):
+        (WebNavigationData::originalRequest):
+        (WebNavigationData::response):
+        (WebNavigationData::hasSubstituteData):
+        (WebNavigationData::clientRedirectSource):
+        * WebNavigationData.h: Added.
+
+2009-10-13  Dave Hyatt  <hyatt@apple.com>
+
+        Fix more WebView bustage.
+
+        * WebView.cpp:
+        (WebView::addUserScriptToGroup):
+        (WebView::addUserStyleSheetToGroup):
+        (WebView::removeUserScriptsFromGroup):
+        (WebView::removeUserStyleSheetsFromGroup):
+
+2009-10-13  Dave Hyatt  <hyatt@apple.com>
+
+        Fix build bustage on Windows.
+
+        * WebView.cpp:
+        (WebView::addUserScriptToGroup):
+        (WebView::addUserStyleSheetToGroup):
+        (WebView::removeUserScriptsFromGroup):
+        (WebView::removeUserStyleSheetsFromGroup):
+
+2009-10-13  Dave Hyatt  <hyatt@apple.com>
+
+        Reviewed by Adam Roben..
+
+        Split removal functions for user scripts and stylehseets based on type.
+
+        * Interfaces/IWebViewPrivate.idl:
+        * WebView.cpp:
+        (WebView::removeUserScriptFromGroup):
+        (WebView::removeUserStyleSheetFromGroup):
+        * WebView.h:
+
+2009-10-09  Adam Barth  <abarth@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        Factor HistoryController out of FrameLoader
+        https://bugs.webkit.org/show_bug.cgi?id=30246
+
+        Update API call.
+
+        * WebView.cpp:
+        (WebView::loadBackForwardListFromOtherView):
+
+2009-10-08  Jon Honeycutt  <jhoneycutt@apple.com>
+
+        Remove the WebKitPluginHalterEnabledPreferenceKey in favor of checking
+        for the existence of a PluginHalterDelegate.
+
+        Reviewed by Dan Bernstein.
+
+        * Interfaces/IWebPreferencesPrivate.idl:
+        Remove the getter and setter.
+
+        * WebCoreSupport/WebPluginHalterClient.cpp:
+        (WebPluginHalterClient::enabled):
+        Return true if the delegate exists.
+
+        * WebCoreSupport/WebPluginHalterClient.h:
+        Declare implementation of enabled().
+
+        * WebPreferenceKeysPrivate.h:
+        Removed the pref key.
+
+        * WebPreferences.cpp:
+        (WebPreferences::initializeDefaultSettings):
+        Removed initialization of the pref.
+
+        * WebPreferences.h:
+        Removed declaration of the getter/setter.
+
+        * WebView.cpp:
+        (WebView::notifyPreferencesChanged):
+        Don't propagate the pref.
+
+2009-10-08  Adam Barth  <abarth@webkit.org>
+
+        Reviewed by Eric Seidel.
+
+        Move executeScript from FrameLoader to ScriptController
+        https://bugs.webkit.org/show_bug.cgi?id=30200
+
+        Update API call.
+
+        * WebView.cpp:
+        (WebView::stringByEvaluatingJavaScriptFromString):
+
+2009-10-08  Anders Carlsson  <andersca@apple.com>
+
+        Reviewed by Sam Weinig.
+
+        Remove the shouldLoadMediaElementURL implementation.
+
+        * Interfaces/IWebPolicyDelegatePrivate.idl:
+        * WebCoreSupport/WebFrameLoaderClient.cpp:
+        (WebFrameLoaderClient::shouldUsePluginDocument):
+        * WebCoreSupport/WebFrameLoaderClient.h:
+
+2009-10-08  Adam Roben  <aroben@apple.com>
+
+        Make IWebInspectorPrivate be accessed in a more standard way
+
+        IWebViewPrivate::inspectorPrivate has been removed. Callers should
+        instead use IWebViewPrivate::inspector and then use QueryInterface to
+        get the IWebInspectorPrivate interface. This matches how our other COM
+        classes work.
+
+        Fixes <http://webkit.org/b/30215> Make IWebInspectorPrivate be
+        accessed in a more standard way
+
+        Reviewed by John Sullivan and Tim Hatcher.
+
+        * Interfaces/IWebViewPrivate.idl: Removed inspectorPrivate.
+
+        * WebInspector.cpp:
+        (WebInspector::QueryInterface): Support querying to
+        IWebInspectorPrivate.
+
+        * WebView.cpp:
+        * WebView.h:
+        Removed inspectorPrivate.
+
+2009-10-08  Adam Roben  <aroben@apple.com>
+
+        Move the new IWebViewPrivate::inspectorPrivate function after all
+        functions that existed when Safari 4.0.3 was released
+
+        Fixes <http://webkit.org/b/30085> REGRESSION (r49091): run-safari
+        crashes in Safari.dll
+
+        Reviewed by John Sullivan.
+
+        * Interfaces/IWebViewPrivate.idl: Moved inspectorPrivate to the end of
+        the interface, so it won't modify the vtable that Safari 4.0.3 sees.
+
+2009-10-07  Adam Roben  <aroben@apple.com>
+
+        Expose origin whitelisting in the WebKit API on Windows
+
+        Fixes <http://webkit.org/b/30185>.
+
+        Reviewed by Eric Seidel.
+
+        * Interfaces/IWebViewPrivate.idl: Added whiteListAccessFromOrigin and
+        resetOriginAccessWhiteLists, to match the Mac SPI.
+
+        * WebView.cpp:
+        (WebView::whiteListAccessFromOrigin):
+        (WebView::resetOriginAccessWhiteLists):
+        * WebView.h:
+        Added. These just call through to SecurityOrigin.
+
+2009-10-07  Adam Barth  <abarth@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        Factor PolicyChecker out of FrameLoader
+        https://bugs.webkit.org/show_bug.cgi?id=30155
+
+        Move the policy callback to the policy object.
+
+        * WebFrame.cpp:
+        (WebFrame::dispatchWillSubmitForm):
+        (WebFrame::receivedPolicyDecision):
+        (WebFrame::dispatchDecidePolicyForMIMEType):
+        (WebFrame::dispatchDecidePolicyForNewWindowAction):
+        (WebFrame::dispatchDecidePolicyForNavigationAction):
+
+2009-10-07  Daniel Bates  <dbates@webkit.org>
+
+        Reviewed by Darin Adler.
+
+        https://bugs.webkit.org/show_bug.cgi?id=30102
+        And
+        <rdar://problem/5015957>
+        
+        Fixes an issue (in the Windows build) where the cursor does not change to the
+        not-allowed cursor when the drag-and-drop operation is not allowed.
+        
+        The allowed effects in WebDragClient::startDrag are hard-coded to be 
+        DROPEFFECT_COPY | DROPEFFECT_LINK | DROPEFFECT_MOVE. Instead, the list of 
+        allowed drop effects should be determined by the allowed operations of the
+        drag source.
+        
+        We cannot test this using DRT because DRT looks at the programmatic drop 
+        cursor and until bug #24731 is fixed this value is hard-coded to DragOperationCopy.
+        That is, there is a discrepancy in the Windows build between the Windows API-based 
+        drop effect and the WebKit drop effect. Because DRT cannot read the screen buffer 
+        to determine the cursor, a manual test is needed.
+
+        * WebCoreSupport/WebDragClient.cpp:
+        (draggingSourceOperationMaskToDragCursors): Added method.
+        (WebDragClient::startDrag):
+
+2009-10-07  Steve Falkenburg  <sfalken@apple.com>
+
+        Reviewed by Darin Adler.
+
+        https://bugs.webkit.org/show_bug.cgi?id=30176
+        <rdar://problem/7281553> Extra information in UA causes problems with gmail
+        
+        * WebKit.vcproj/WebKit.rc: Restore PRODUCTVERSION to build number only. Remove extra space.
+
+2009-10-06  Pavel Feldman  <pfeldman@chromium.org>
+
+        Reviewed by Timothy Hatcher.
+
+        Web Inspector: default to an attached inspector window on Windows (as on Mac).
+
+        https://bugs.webkit.org/show_bug.cgi?id=30134
+
+        * WebCoreSupport/WebInspectorClient.cpp:
+        (WebInspectorClient::showWindowWithoutNotifications):
+
+2009-10-06  Adam Barth  <abarth@webkit.org>
+
+        Reviewed by Eric Seidel.
+
+        Move FrameLoader::canLoad to SecurityOrigin
+        https://bugs.webkit.org/show_bug.cgi?id=30111
+
+        * WebFrame.cpp:
+        (WebFrame::allowsFollowingLink):
+
+2009-10-06  Pavel Feldman  <pfeldman@chromium.org>
+
+        Reviewed by Timothy Hatcher.
+
+        Web Inspector: close inspector client view on
+        InspectorController::close API call.
+
+        In order to run batch web inspector layout tests (and not affect 
+        subsequent tests) we should close inspector client's view upon
+        InspectorController::close API call.
+
+        https://bugs.webkit.org/show_bug.cgi?id=30009
+
+        * WebCoreSupport/WebInspectorClient.cpp:
+        (WebInspectorClient::createPage):
+
+2009-10-06  David Levin  <levin@chromium.org>
+
+        Reviewed by NOBODY (windows build fix).
+
+        Speculative build fix for windows (due to r49160).
+
+        * WebDownloadCFNet.cpp:
+        (WebDownload::initToResumeWithBundle):
+        * WebIconDatabase.cpp:
+        (WebIconDatabase::dispatchDidAddIconForPageURL):
+
+2009-10-05  Pavel Feldman  <pfeldman@chromium.org>
+
+        Reviewed by Timothy Hatcher.
+
+        Web Inspector: add testing harness for Web Inspector.
+
+        https://bugs.webkit.org/show_bug.cgi?id=30010
+
+        * Interfaces/IWebInspectorPrivate.idl: Added.
+        * Interfaces/IWebViewPrivate.idl:
+        * Interfaces/WebKit.idl:
+        * WebInspector.cpp:
+        (WebInspector::evaluateInFrontend):
+        * WebInspector.h:
+        * WebView.cpp:
+        (WebView::inspectorPrivate):
+        * WebView.h:
+
+2009-10-02  Dave Hyatt  <hyatt@apple.com>
+
+        Reviewed by Adam Roben.
+
+        Add support for blacklist patterns to user stylesheets and scripts in addition to whitelist patterns.
+
+        * Interfaces/IWebViewPrivate.idl:
+        * WebView.cpp:
+        (toStringVector):
+        (WebView::addUserScriptToGroup):
+        (WebView::addUserStyleSheetToGroup):
+        * WebView.h:
+
+2009-10-02  Steve Falkenburg  <sfalken@apple.com>
+
+        Reviewed by Mark Rowe.
+
+        <https://bugs.webkit.org/show_bug.cgi?id=29989>
+        Safari version number shouldn't be exposed in WebKit code
+        
+        For a WebKit version of 532.3.4:
+        Product version is: 5.32.3.4 (was 4.0.3.0)
+        File version is: 5.32.3.4 (was 4.532.3.4)
+
+        * WebKit.vcproj/WebKit.rc:
+
 2009-09-30  Sam Weinig  <sam@webkit.org>
 
         Reviewed by Dan Bernstein.

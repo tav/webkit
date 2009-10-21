@@ -31,6 +31,7 @@ namespace JSC {
 
     class DateInstance : public JSWrapperObject {
     public:
+        DateInstance(ExecState*, double);
         explicit DateInstance(NonNullPassRefPtr<Structure>);
         virtual ~DateInstance();
 
@@ -41,9 +42,17 @@ namespace JSC {
         bool getTime(double& milliseconds, int& offset) const;
         bool getUTCTime(double& milliseconds) const;
 
-        static const ClassInfo info;
+        static JS_EXPORTDATA const ClassInfo info;
 
         void msToGregorianDateTime(double, bool outputIsUTC, WTF::GregorianDateTime&) const;
+
+        static PassRefPtr<Structure> createStructure(JSValue prototype)
+        {
+            return Structure::create(prototype, TypeInfo(ObjectType, StructureFlags));
+        }
+
+    protected:
+        static const unsigned StructureFlags = OverridesMarkChildren | JSWrapperObject::StructureFlags;
 
     private:
         virtual const ClassInfo* classInfo() const { return &info; }

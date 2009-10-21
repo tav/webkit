@@ -216,6 +216,14 @@ sub determineArchitecture
     }
 }
 
+sub jscPath($)
+{
+    my ($productDir) = @_;
+    my $jscName = "jsc";
+    $jscName .= "_debug"  if (isCygwin() && ($configuration eq "Debug"));
+    return "$productDir/$jscName";
+}
+
 sub argumentsForConfiguration()
 {
     determineConfiguration();
@@ -300,6 +308,16 @@ sub productDir
 {
     determineConfigurationProductDir();
     return $configurationProductDir;
+}
+
+sub jscProductDir
+{
+    my $productDir = productDir();
+    $productDir .= "/JavaScriptCore" if isQt();
+    $productDir .= "/$configuration" if (isQt() && isWindows());
+    $productDir .= "/Programs" if isGtk();
+
+    return $productDir;
 }
 
 sub configuration()
@@ -1122,7 +1140,12 @@ sub buildVisualStudioProject
         $action = "/clean";
     }
 
-    my @command = ($vcBuildPath, $winProjectPath, $action, $config);
+    my $useenv = "/useenv";
+    if (isChromium()) {
+        $useenv = "";
+    }
+
+    my @command = ($vcBuildPath, $useenv, $winProjectPath, $action, $config);
 
     print join(" ", @command), "\n";
     return system @command;
@@ -1359,7 +1382,7 @@ sub buildQMakeProject($@)
     print "Calling '$qmakebin @buildArgs' in " . $dir . "\n\n";
     print "Installation directory: $prefix\n" if(defined($prefix));
 
-    my $result = system $qmakebin, @buildArgs;
+    my $result = system "$qmakebin @buildArgs";
     if ($result ne 0) {
        die "Failed to setup build environment using $qmakebin!\n";
     }
@@ -1399,11 +1422,13 @@ sub buildChromium($@)
     my $result = 1;
     if (isDarwin()) {
         # Mac build - builds the root xcode project.
-        $result = buildXCodeProject("WebKit/chromium/webkit", $clean, (@options));
+        $result = buildXCodeProject("WebKit/chromium/webkit",
+                                    $clean,
+                                    (@options));
     } elsif (isCygwin()) {
-        # Windows build
-        # FIXME support windows.
-        print STDERR "Windows build is not supported. Yet.";
+        # Windows build - builds the root visual studio solution.
+        $result = buildVisualStudioProject("WebKit/chromium/webkit.sln",
+                                           $clean);
     } elsif (isLinux()) {
         # Linux build
         # FIXME support linux.

@@ -595,7 +595,7 @@ static inline WebDataSource *dataSource(DocumentLoader* loader)
 {
     ASSERT(_private->coreFrame->document());
     
-    JSValue result = _private->coreFrame->loader()->executeScript(string, forceUserGesture).jsValue();
+    JSValue result = _private->coreFrame->script()->executeScript(string, forceUserGesture).jsValue();
 
     if (!_private->coreFrame) // In case the script removed our frame from the page.
         return @"";
@@ -1199,7 +1199,7 @@ static inline WebDataSource *dataSource(DocumentLoader* loader)
 {
     if (!_private->coreFrame)
         return YES;
-    return FrameLoader::canLoad(URL, String(), _private->coreFrame->document());
+    return SecurityOrigin::canLoad(URL, String(), _private->coreFrame->document());
 }
 
 @end

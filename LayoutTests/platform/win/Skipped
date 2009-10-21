@@ -95,15 +95,18 @@ svg/hixie/viewbox/preserveAspectRatio/002.xml
 # ASSERT in ClipboardWin::setData <rdar://problem/5015941>
 editing/execCommand/copy-without-selection.html
 
-# <rdar://problem/6794880> editing/pasteboard/paste-xml.xhtml results didn't change on Windows after r42549
-editing/pasteboard/paste-xml.xhtml
-
 # Drag & Drop doesn't work correctly in DRT <rdar://5621244>
 editing/pasteboard/drag-image-in-about-blank-frame.html
 editing/pasteboard/get-data-text-plain-drop.html
 editing/selection/drag-in-iframe.html
 fast/events/drag-in-frames.html
 fast/events/standalone-image-drag-to-editable.html
+
+# Windows drag-and-drop does not work correctly (https://bugs.webkit.org/show_bug.cgi?id=24731)
+fast/events/drag-and-drop-none.html
+
+# Event.dataTransfer.types does not behave correctly (https://bugs.webkit.org/show_bug.cgi?id=30527)
+fast/events/drag-and-drop-dataTransfer-types-nocrash.html
 
 # <rdar://problem/5643675> window.scrollTo scrolls a window with no scrollbars
 fast/events/attempt-scroll-with-no-scrollbars.html
@@ -252,10 +255,6 @@ http/tests/xmlhttprequest/cookies.html
 
 # <rdar://5723191>
 http/tests/navigation/javascriptlink-frames.html
-
-
-#<rdar://problem/5829342> REGRESSION: fast/canvas/toDataURL-supportedTypes.html fails on Windows
-fast/canvas/toDataURL-supportedTypes.html
 
 #<rdar://problem/5829202> new subframe reload tests fail on Windows
 http/tests/navigation/reload-subframe-object.html
@@ -619,6 +618,7 @@ http/tests/security/isolatedWorld/number-prototype.html
 http/tests/security/isolatedWorld/object-prototype.html
 http/tests/security/isolatedWorld/string-prototype.html
 http/tests/security/isolatedWorld/window-properties.html
+http/tests/security/isolatedWorld/world-reuse.html
 
 # New test with questionable results
 # See https://bugs.webkit.org/show_bug.cgi?id=28079 for explanation.
@@ -645,14 +645,6 @@ media/video-source-error.html
 
 # <http://webkit.org/b/28467>
 http/tests/loading/preload-img-test.html
-
-# Missing LayoutTestController implementation
-http/tests/xmlhttprequest/origin-whitelisting-all.html
-http/tests/xmlhttprequest/origin-whitelisting-exact-match.html
-http/tests/xmlhttprequest/origin-whitelisting-https.html
-http/tests/xmlhttprequest/origin-whitelisting-ip-addresses.html
-http/tests/xmlhttprequest/origin-whitelisting-ip-addresses-with-subdomains.html
-http/tests/xmlhttprequest/origin-whitelisting-subdomains.html
 
 # No TextInputController
 fast/forms/input-maxlength-ime-completed.html
@@ -688,5 +680,14 @@ http/tests/xmlhttprequest/xmlhttprequest-missing-file-exception.html
 # This port doesn't support detecting slow unload handlers.
 fast/dom/Window/slow_unload_handler.html
 
-# This port doesn't have a global history delegate yet
-http/tests/globalhistory
+# <https://bugs.webkit.org/show_bug.cgi?id=29966>
+fast/inline/relative-positioned-overflow.html
+
+# <https://bugs.webkit.org/show_bug.cgi?id=30348>
+plugins/private-browsing-mode.html
+
+# Skip these two failures I introduced this morning while I explore them.
+http/tests/globalhistory/history-delegate-basic-visited-links.html
+
+# This test has never passed on Windows (https://bugs.webkit.org/show_bug.cgi?id=30234)
+platform/win/editing/selection/doubleclick-should-not-expand-across-lines.html

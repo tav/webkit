@@ -319,6 +319,8 @@ static void resetDefaultsToConsistentValues()
                  "enable-offline-web-application-cache", TRUE,
                  "enable-universal-access-from-file-uris", TRUE,
                  "enable-scripts", TRUE,
+                 "enable-web-sockets", TRUE,
+                 "enable-dom-paste", TRUE,
                  "default-font-family", "Times",
                  "monospace-font-family", "Courier",
                  "serif-font-family", "Times",
@@ -334,6 +336,8 @@ static void resetDefaultsToConsistentValues()
     g_object_set(G_OBJECT(inspector), "javascript-profiling-enabled", FALSE, NULL);
 
     webkit_reset_origin_access_white_lists();
+
+    setlocale(LC_ALL, "");
 }
 
 void dump()

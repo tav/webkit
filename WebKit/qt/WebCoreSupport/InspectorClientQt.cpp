@@ -84,9 +84,6 @@ void InspectorClientQt::inspectorDestroyed()
 
 Page* InspectorClientQt::createPage()
 {
-    if (m_inspectorView)
-        return m_inspectorView->page()->d->page;
-
     QWebView* inspectorView = new QWebView;
     InspectorClientWebPage* inspectorPage = new InspectorClientWebPage(inspectorView);
     inspectorView->setPage(inspectorPage);
@@ -138,12 +135,12 @@ void InspectorClientQt::detachWindow()
     notImplemented();
 }
 
-void InspectorClientQt::setAttachedWindowHeight(unsigned height)
+void InspectorClientQt::setAttachedWindowHeight(unsigned)
 {
     notImplemented();
 }
 
-void InspectorClientQt::highlight(Node* node)
+void InspectorClientQt::highlight(Node*)
 {
     notImplemented();
 }
@@ -205,7 +202,7 @@ void InspectorClientQt::storeSetting(const String& key, const InspectorControlle
     qsettings.setValue(settingKey + settingStorageTypeSuffix, QVariant::typeToName(valueToStore.type()));
 }
 
-void InspectorClientQt::removeSetting(const String& key)
+void InspectorClientQt::removeSetting(const String&)
 {
     notImplemented();
 }

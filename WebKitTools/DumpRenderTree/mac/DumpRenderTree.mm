@@ -409,7 +409,7 @@ static void resetDefaultsToConsistentValues()
     [preferences setCacheModel:WebCacheModelDocumentBrowser];
     [preferences setXSSAuditorEnabled:NO];
     [preferences setExperimentalNotificationsEnabled:NO];
-    [preferences setExperimentalWebSocketsEnabled:NO];
+    [preferences setPluginAllowedRunTime:1];
 
     [preferences setPrivateBrowsingEnabled:NO];
     [preferences setAuthorAndUserStylesEnabled:YES];
@@ -443,6 +443,8 @@ static void resetDefaultsToConsistentValues()
         [preferences setAcceleratedCompositingEnabled:YES];
 
     [[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookieAcceptPolicy:NSHTTPCookieAcceptPolicyOnlyFromMainDocumentDomain];
+
+    setlocale(LC_ALL, "");
 }
 
 // Called once on DumpRenderTree startup.
